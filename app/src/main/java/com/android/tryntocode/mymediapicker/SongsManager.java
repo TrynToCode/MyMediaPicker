@@ -1,5 +1,12 @@
 package com.android.tryntocode.mymediapicker;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Log;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -11,10 +18,9 @@ import java.util.List;
  */
 
 public class SongsManager {
-    // SDCard Path
-    public static final String DEFAULT_MEDIA_PATH = new String("/sdcard/");
     public static final String SONG_TITLE = "SONG_TITLE";
     public static final String SONG_PATH = "SONG_PATH";
+    public static final String SONG_ID = "SONG_ID";
 
     // Constructor
     public SongsManager(){
@@ -25,30 +31,26 @@ public class SongsManager {
      * Function to read all mp3 files from sdcard
      * and store the details in ArrayList
      * */
-    public static ArrayList<HashMap<String, String>> getPlayList(String mediaPath){
-        File home = new File(mediaPath);
+    public static ArrayList<HashMap<String, String>> getPlayList(Context ctx){
+        ContentResolver contentResolver = ctx.getContentResolver();
+        Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor songCursor = contentResolver.query(songUri, null, null, null, null);
         ArrayList<HashMap<String, String>> songsList = new ArrayList<>();
 
-        if (home.listFiles(new FileExtensionFilter()).length > 0) {
-            for (File file : home.listFiles(new FileExtensionFilter())) {
+        if (songCursor != null && songCursor.moveToFirst()) {
+            while(songCursor.moveToNext()) {
+                int songId = songCursor.getColumnIndex(MediaStore.Audio.Media._ID);
+                int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+                int data = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
                 HashMap<String, String> song = new HashMap<String, String>();
-                song.put(SONG_TITLE, file.getName().substring(0, (file.getName().length() - 4)));
-                song.put(SONG_PATH, file.getPath());
+                song.put(SONG_TITLE, songCursor.getString(songTitle));
+                song.put(SONG_PATH, songCursor.getString(data));
+                song.put(SONG_ID, songCursor.getString(songId));
 
                 // Adding each song to SongList
                 songsList.add(song);
             }
         }
-        // return songs list array
         return songsList;
-    }
-
-    /**
-     * Class to filter files which are having .mp3 extension
-     * */
-    static class FileExtensionFilter implements FilenameFilter {
-        public boolean accept(File dir, String name) {
-            return (name.endsWith(".mp3") || name.endsWith(".MP3"));
-        }
     }
 }

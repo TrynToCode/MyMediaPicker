@@ -2,12 +2,12 @@ package com.android.tryntocode.mymediapicker;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +35,9 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.songPath = this.songsList.get(position).get(SongsManager.SONG_PATH);
         holder.tvSongName.setText(this.songsList.get(position).get(SongsManager.SONG_TITLE));
+        holder.songId = this.songsList.get(position).get(SongsManager.SONG_ID);
     }
 
     @Override
@@ -48,14 +50,22 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder> 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvSongName;
+        String songPath;
+        String songId;
         public ViewHolder(View itemView) {
             super(itemView);
             tvSongName = itemView.findViewById(R.id.tv_songName);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    songHandler.songSelected(songsList.get(getAdapterPosition()).get(SongsManager.SONG_PATH));
+                }
+            });
         }
     }
 
     // Interface contract for Song handlers.
     public interface SongHandler {
-        public void songSelected(String path);
+        void songSelected(String path);
     }
 }

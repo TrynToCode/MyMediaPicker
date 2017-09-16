@@ -1,5 +1,6 @@
 package com.android.tryntocode.mymediapicker;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,12 +23,14 @@ public class MusicPickerActivity extends AppCompatActivity implements SongsAdapt
         setSupportActionBar(toolbar);
         recyclerView = (RecyclerView)findViewById(R.id.rv_songs);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new SongsAdapter(this, this, null));
+        recyclerView.setAdapter(new SongsAdapter(this, this, SongsManager.getPlayList(this)));
     }
 
     @Override
     public void songSelected(String path) {
-        Toast.makeText(this, "Song selected -> " + path, Toast.LENGTH_SHORT).show();
-        Log.d(this.getClass().getSimpleName(), "Song Selected -> " + path);
+        Intent result = new Intent();
+        result.putExtra(SongsManager.SONG_PATH, path);
+        setResult(RESULT_OK, result);
+        finish();
     }
 }
